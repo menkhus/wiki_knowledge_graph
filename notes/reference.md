@@ -226,6 +226,48 @@ rule, not a separate set of features. If this becomes something you
 publish, this sentence is plausibly the thesis statement the rest of the
 document exists to support.
 
+### Scope correction, same session: personal book library is a closed side-branch, not an application of this thesis
+
+You raised, then tested, and then correctly withdrew: whether the
+front-matter/ToC/back-matter-index thesis extends to your personal library
+of ~1,000 books. On inspection it does not extend cleanly, for reasons worth
+recording so this doesn't get re-opened without cause:
+
+- **Legal footing is reversed from the rest of this document.** The SDM and
+  Wikipedia (and whatever Wikipedia cites) are public, fetchable, and
+  legitimately citable in full. Most of the ~1,000 books are commercially
+  published, copyrighted works you own a personal copy of, not a right to
+  extract or serve structure from — even indexing "just" a book's own
+  back-matter index is arguably reproducing someone else's copyrighted
+  organizational work, unlike Wikipedia's own explicitly public/CC-licensed
+  index. This is the inverse of §0's core design move (ground in public,
+  fetchable material to avoid the copyright/recall fault line) — applying it
+  to a personal physical library walks back into the fault line instead of
+  around it.
+- **The physical-book problem is cataloging, not knowledge architecture.**
+  A shelf of physical books provides no machine-readable ToC/index text
+  regardless of the design's merits — getting there means manually
+  transcribing front matter from a thousand books, a large, low-reward data
+  entry project distinct from anything else in this document.
+- **The marginal value is low where it would apply at all.** A model already
+  has broad general familiarity with most commercially published,
+  widely-discussed books' content and structure from training data — unlike
+  the SDM (narrow, technical, revision-sensitive, no public API) or a
+  wiki-and-its-citations (explicitly meant to be current and public), a
+  personal library of known commercial titles adds comparatively little a
+  general-purpose model doesn't already have some access to.
+
+**Disposition: closed, not pursued.** If a real need resurfaces here, it is
+almost certainly a smaller, different, and more personal project — e.g.
+"catalog what I own and what I thought of it" — not an instance of the
+public-document-grounding thesis this document is about. A rough, partial
+prior-art asset exists if that project is ever picked up:
+`~/Documents/src/gemini/marks_booklist_0702025.{csv,json}` — a ~844-title
+scraped title/author catalog with known parser artifacts at the top of the
+file (script code and header-row text leaked into the data) and an
+unresolved discrepancy against the source page's own "950 titles" claim,
+never cleaned up. Left as-is; not a dependency of anything in this project.
+
 ---
 
 ## 1. Summary
