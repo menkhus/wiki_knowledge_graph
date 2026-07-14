@@ -67,10 +67,164 @@ reader and to an AI grounding a claim.** In that frame:
   citation," across documents, without each document re-inventing entity
   identity from scratch.
 
+### Is this naive? — checked against evidence, not assumed either way
+
+You raised, this session, that AI engineers would likely call this naive:
+that engineers train on "the shreds of the data" and don't care about
+post-training grounding or references, and that no one trusts AI knowledge
+recall as a result. This deserved a check against actual research rather
+than a reflexive defense or a reflexive concession — the claim turns out to
+be **half right, in a specific and useful way**, not simply naive or simply
+correct.
+
+**Where you're right, with a citable mechanism, not just a vibe:**
+"Fewer truncations improve language modeling" (ICML 2024) found that the
+standard concat-and-chunk pretraining pipeline — fixed-length windows that
+ignore document boundaries — **actively causes** hallucination and breaks
+factual consistency, because the model ends up attending across unrelated
+documents stitched together arbitrarily inside one training window. This is
+not a metaphor for carelessness; it is a measured training-time defect with
+a specific cause, presented at a top ML venue, with proposed fixes (keep
+chunks single-document; pack by relatedness). See
+[arXiv summary via Pinecone chunking overview](https://www.pinecone.io/learn/chunking-strategies/)
+and the Amazon Science writeup,
+["Improving LLM pretraining with better data organization."](https://www.amazon.science/blog/improving-llm-pretraining-with-better-data-organization)
+So: "engineers are just using the shreds of the data" is, for a real and
+still-common share of current pretraining practice, literally true — not
+cynicism.
+
+**Where "no one trusts AI knowledge recall" is right, with numbers:** a 2026
+Futurum Group Decision Maker Survey (n=820) found 55.4% of organizations
+name "AI agent reliability and hallucination management in production" as
+their top adoption barrier. A Financial Times survey of 1,200 C-suite
+executives found 71% unwilling to scale AI without "hallucination-proofing."
+Current studies still measure GPT-4o/Claude-class models hallucinating on
+15–20% of factual citation tasks — with invented DOIs well-formed enough,
+and invented author names plausible enough, that detection requires an
+actual lookup against Crossref/Semantic Scholar, not inspection by eye. See
+[Futurum Group, "AI Code Review Hits a Wall"](https://futurumgroup.com/insights/ai-code-review-hits-a-wall-why-speed-without-trust-risks-engineering-chaos/)
+and
+["Hallucinations in generative AI: A threat to scholarly integrity"](https://www.sciencedirect.com/science/article/abs/pii/S221462962600191X).
+The failure mode's danger is precisely that it's *plausible*, not obviously
+wrong — which is a stronger argument for grounding than "AI is sometimes
+wrong" alone would be.
+
+**Where the field is already moving toward your thesis, not away from
+it — this is the part worth knowing before assuming engineers would dismiss
+this as naive:** the same body of evidence finds retrieval grounding cuts
+hallucination by an estimated 75–90%, tool grounding by 65–80%, and —
+directly bearing on your "reference supporting is AI reference grounding
+too" — **users who can see the citation trail report measurably higher
+confidence** in the answer. See
+["AI Hallucination and Grounding: How Citation Actually Works in Enterprise Knowledge Systems"](https://www.clarityarc.com/insights/ai-hallucination-grounding-citation)
+and
+["RAG & AI Trust Statistics 2026: Beating Hallucinations."](https://www.cmarix.com/blog/rag-ai-statistics/)
+Visible, checkable grounding is not a fringe position in 2026 — it is the
+field's best-evidenced current mitigation, and the direction of travel
+matches your instinct.
+
+**So the precise version of "would an AI engineer call this naive":** not
+the grounding thesis itself — that's now mainstream, well-evidenced
+consensus, not a fringe idea, and dismissing it as naive would itself be out
+of step with the 2026 literature. The genuinely open, still-contested part
+is the specific *mechanism* you're proposing: that a document's own
+human-authored front matter and structure (title, date, ToC, index) should
+serve as the grounding substrate, rather than an embedding index computed
+after the fact. An AI engineer could reasonably call *that specific choice*
+unproven at scale — not because §4 shows it's wrong (PageIndex's reported
+results suggest it can outperform embeddings on densely structured
+documents), but because most production grounding systems in 2026 still
+default to embedding-based RAG, and a structure-native alternative remains
+an emerging, minority practice rather than the field's default tool. That
+is a fair, narrow objection to anticipate and answer — not a reason to
+abandon the thesis.
+
 This reframing doesn't discard anything decided earlier in this document —
 it explains *why* the RAG/wiki/KG distinction (§3) and the page/ToC-structure
 findings (§4) both mattered: they are properties a well-published document
 needs, not competing systems to choose between.
+
+### Follow-up, same session: training-data recall, copyright, and why grounding-by-fetch sidesteps the whole fault line
+
+You sharpened the "naive" question further: a trained model has *already*
+seen some version of whatever document a person wants to reference, but
+"AI recall is controversial" specifically because of **legal and
+engineering-driven guardrails** designed to suppress or deny verbatim
+recall-and-reuse — not because the capability doesn't exist. Your proposal:
+stop relying on or invoking trained-in recall at all. Ground every answer
+instead in **publicly available, currently-fetched** documents via their own
+front/back matter, the same move a diligent human researcher makes — which
+never enters memorization/reproduction territory to begin with, rather than
+trying to argue that territory is safe.
+
+Checked against 2026 evidence, not assumed: **this is not a generalization —
+it is a specific, documented, currently-litigated fault line, and your
+read of it is accurate.**
+
+- **Verbatim memorization is real and measured, not hypothetical.**
+  "Extracting books from production language models" (January 2026,
+  [arXiv:2601.02671](https://arxiv.org/pdf/2601.02671)) documents ~95.8%
+  verbatim recall of *Harry Potter and the Sorcerer's Stone* from
+  Claude 3.7 Sonnet, and two full in-copyright books (including *1984*)
+  extracted near-verbatim from a production, guardrailed, consumer-facing
+  model. This is a "production, consumer-facing LLM (with guardrails)" being
+  *induced* to emit this — meaning the guardrail's job is specifically to
+  make that induction hard, not to make the underlying recall absent. See
+  [summary discussion](https://p4sc4l.substack.com/p/can-production-consumer-facing-llms).
+- **Companies deploy output filters to block this, and cite the filters'
+  effectiveness in legal defense.** RLHF, system prompts, and output filters
+  aimed at blocking verbatim regurgitation are documented industry practice,
+  and their efficacy has been cited by AI companies directly in litigation.
+  This matches your claim precisely: the guardrail is a legal-exposure
+  mitigation layered on top of a real capability, not evidence the capability
+  doesn't exist.
+- **The legal fault line is specific and currently moving, not vague
+  "controversy."** *Bartz et al. v. Anthropic* settled for **$1.5B**
+  (~$3,000/work) over **storing pirated copies** — a distinct issue from
+  whether training itself is fair use. Courts are trending toward treating
+  training as fair use (called "highly transformative"), while 2026
+  litigation is explicitly **shifting from training-data acquisition toward
+  output-level reproduction claims** (Disney v. Midjourney is the marquee
+  2026 case on this shift). See
+  [Norton Rose Fulbright, "AI in litigation series: An update on AI copyright cases in 2026"](https://www.nortonrosefulbright.com/en/knowledge/publications/ce8eaa5f/ai-in-litigation-series-an-update-on-ai-copyright-cases-in-2026)
+  and
+  [Morrison Foerster, "Copyright Litigation Shifts from Training Data to AI Outputs."](https://www.mofo.com/resources/insights/260210-ai-trends-for-2026-copyright-litigation)
+  So: training-time ingestion is trending toward legally settled (fair use);
+  verbatim output reproduction is exactly where legal exposure is
+  concentrating in 2026 — which is precisely the boundary your "no we don't
+  have the ability to recall that" guardrail behavior is drawn to protect.
+
+**Why grounding-by-fetch is the clean way out, not a workaround:** if the
+system's design principle is "never answer from what might be memorized —
+always look up the current, publicly available document and cite the
+specific section," the memorization/reproduction question becomes
+structurally irrelevant to how the system operates, rather than a risk to
+manage or a controversy to litigate around. The AI is never being asked to
+"recall and reuse" training-data content as its answer; it is being asked to
+fetch, read, and cite a public document *at query time*, the same operation
+a human researcher performs, using human knowledge-extraction conventions
+(front matter, back matter, citation) that are not controversial because
+they were never about model memorization in the first place. This is a
+second, independent argument for the front-matter/back-matter-native design
+in §4 and the thesis in this section — not just that it may retrieve better
+(the PageIndex evidence), but that it avoids the copyright/memorization
+fault line entirely by construction, rather than by guardrail suppression
+after the fact.
+
+**The plain-language version, your own words, and the center this whole
+section has been circling:** *this is in some ways how to talk to a
+human, without over-reaching into AI recall and hallucination.* Strip away
+the legal argument, the hallucination statistics, and the retrieval-quality
+evidence, and one behavioral rule is left, and it is the actual design
+principle: **an AI operating this way talks the way a well-prepared human
+does** — it says "here's what this specific, current source says, here's
+where," rather than asserting from memory and hoping the memory is right.
+Everything else in this document — front matter as provenance, back-matter
+index as the navigation aid, fetch-at-query-time instead of trained recall,
+avoiding the copyright fault line — is a mechanism *in service of* that one
+rule, not a separate set of features. If this becomes something you
+publish, this sentence is plausibly the thesis statement the rest of the
+document exists to support.
 
 ---
 
