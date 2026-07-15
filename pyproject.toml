@@ -1,0 +1,25 @@
+[project]
+name = "wikidata-connector"
+version = "0.1.0"
+description = "Read-only Wikidata connector: bounded entity-neighborhood grounding-fetch and domain DSL/vocabulary-probe"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Mark Menkhus" }]
+dependencies = [
+    "wikibaseintegrator>=0.12.15",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "responses>=0.25.0"]
+
+[project.scripts]
+wikidata-kg = "wikidata_connector.cli:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["wikidata_connector*"]
