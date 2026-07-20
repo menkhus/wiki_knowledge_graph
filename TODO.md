@@ -41,13 +41,20 @@ Status as of 2026-07-20. Resumed on this machine, now confirmed `arm64`
          not coincidence. File restored, index rebuilt to 57 nodes
          afterward (current on-disk state).
       Acceptance met: no manual JSON editing needed at any step.
+- [x] Deferred Phase 2 mocked tests, written 2026-07-20:
+      `tests/test_neighborhood.py` (5 tests — `fetch_neighborhood` exercised
+      via an injectable `FakeSparqlClient` subclass + a monkeypatched
+      `fetch_entities`, no HTTP mocking needed; covers single/multi-hop,
+      dedup of already-visited QIDs, and early frontier exhaustion) and
+      `tests/test_kg_json_writer.py` (11 tests — schema shape, label
+      collision fallback, dangling-edge filtering, slugify edge cases).
+      Dev deps (`responses`, `pytest`) reinstalled via
+      `uv pip install --python .venv/bin/python -e ".[dev]"` — the repo's
+      own `.venv` didn't have them despite `pyproject.toml` listing the
+      `dev` extra. Full suite: 23/23 passing.
 
 ## Next (in order)
 
-- [ ] Write the deferred Phase 2 mocked tests: `tests/test_neighborhood.py`,
-      `tests/test_kg_json_writer.py`. No hardware dependency.
-      (`uv run pytest` currently fails — `responses`/dev extra isn't
-      installed in this repo's own `.venv`; reinstall dev deps first.)
 - [ ] Phase 3 — DSL/vocabulary-probe capability (`vocab_probe.py`,
       `wikidata-kg vocab` subcommand).
 - [ ] Phase 4 — CLI unification, README/CLAUDE.md updates. `examples/
