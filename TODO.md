@@ -1,7 +1,7 @@
 # TODO
 
-Status as of 2026-07-15. Paused for the summer — resume on an ARM Mac or GPU
-workstation per the hardware note below.
+Status as of 2026-07-20. Resumed on this machine, now confirmed `arm64`
+(Apple Silicon) — the Intel/`torch` blocker no longer applies.
 
 ## Done
 
@@ -16,42 +16,43 @@ workstation per the hardware note below.
       `write_kg_json(...)` produced a valid `ada_lovelace_kg.json`
       (31 nodes, 30 edges, ~12s) with correct schema and freeform
       relationship strings (e.g. `place_of_birth`).
+- [x] Phase 5 — cross-repo end-to-end proof, run 2026-07-20 on `arm64`:
+      1. `ada_lovelace_kg.json` (root=Q7259, 31 nodes) was already staged in
+         `auto_knowledge_graph/knowledge_graph/` from the 2026-07-15 session
+         — no re-fetch needed.
+      2. Installed embedding deps into `auto_knowledge_graph/.venv`
+         (`uv pip install --python .venv/bin/python sentence-transformers
+         faiss-cpu`) — torch 2.13.0 arm64 wheel resolved cleanly, no
+         platform blocker.
+      3. `kg_embeddings.py --build --kg-dir knowledge_graph`: node count
+         went from a baseline 26 (pre-existing index, predates the Ada
+         Lovelace file) to **57** after rebuild. Four 0-byte placeholder
+         `*_kg.json` files skipped with a warning as designed, not a bug.
+      4. `kg_embeddings.py "who is Ada Lovelace" --kg-dir knowledge_graph
+         --with-edges` (note: `query` is a **positional** arg, not `--query`
+         — TODO.md's earlier draft had this wrong): top hit "Ada Lovelace"
+         scored 0.795; edges rendered as freeform strings
+         (`place_of_birth`, `instance_of`, `sex_or_gender`, not forced into
+         the 6-value `RelationType` enum).
+      5. Control: moved `ada_lovelace_kg.json` aside, rebuilt (back to 26
+         nodes), reran the identical query — top score dropped to 0.160 on
+         unrelated architecture-doc nodes, zero Ada Lovelace content.
+         Confirms the new content is actually driving the step-4 result,
+         not coincidence. File restored, index rebuilt to 57 nodes
+         afterward (current on-disk state).
+      Acceptance met: no manual JSON editing needed at any step.
 
 ## Next (in order)
 
 - [ ] Write the deferred Phase 2 mocked tests: `tests/test_neighborhood.py`,
-      `tests/test_kg_json_writer.py`. No hardware dependency — do this
-      first, on any machine, before anything else below.
-- [ ] On an ARM Mac (preferred) or a GPU workstation, set up
-      `auto_knowledge_graph`'s embedding environment:
-      ```
-      cd auto_knowledge_graph
-      uv venv .venv && source .venv/bin/activate
-      uv pip install sentence-transformers faiss-cpu
-      ```
-      Expected to succeed there — confirmed blocked on Intel Mac /
-      Python 3.13 only because no `torch` wheel exists for that
-      platform/version combination (see Known Issues below).
-- [ ] Re-run Phase 5, the cross-repo end-to-end proof:
-      1. `wikidata-kg fetch Q7259 --hops 1 --limit 30 --out knowledge_graph/`
-         (Q7259 = Ada Lovelace; regenerate if `ada_lovelace_kg.json` isn't
-         still around from the last session).
-      2. Copy/symlink the output into `auto_knowledge_graph/knowledge_graph/`.
-      3. `cd auto_knowledge_graph && python3 kg_embeddings.py --build --kg-dir knowledge_graph`
-         — confirm it globs the new file without error, reports an
-         increased node count.
-      4. `python3 kg_embeddings.py --query "who is Ada Lovelace" --kg-dir knowledge_graph --with-edges`
-         — confirm the new nodes surface with plausible scores, and
-         freeform (non-enum) relationship strings render correctly.
-      5. Control: temporarily move the new file aside, rebuild, rerun the
-         same query, confirm results differ (proves the new content is
-         actually contributing, not coincidentally irrelevant).
-      Acceptance: no manual JSON editing needed between step 1 and step 3.
+      `tests/test_kg_json_writer.py`. No hardware dependency.
+      (`uv run pytest` currently fails — `responses`/dev extra isn't
+      installed in this repo's own `.venv`; reinstall dev deps first.)
 - [ ] Phase 3 — DSL/vocabulary-probe capability (`vocab_probe.py`,
-      `wikidata-kg vocab` subcommand). No hardware dependency of its own;
-      do this after Phase 5 passes, per the original phase ordering.
-- [ ] Phase 4 — CLI unification, README/CLAUDE.md updates, `examples/
-      ml_neighborhood_demo.md` recording the real Phase 5 run.
+      `wikidata-kg vocab` subcommand).
+- [ ] Phase 4 — CLI unification, README/CLAUDE.md updates. `examples/
+      ml_neighborhood_demo.md` recording the Phase 5 run is now written
+      (see below) — fold into Phase 4 docs pass.
 
 ## Known issues / decisions made during Phase 1-2 (don't relitigate these)
 
@@ -68,13 +69,14 @@ workstation per the hardware note below.
 - **Q7259 is Ada Lovelace, not Q2539** (Q2539 is "machine learning" —
   caught via live test after an earlier mistaken assumption). Any doc or
   script referencing Q2539 as Ada Lovelace is wrong and should be fixed.
-- **No `torch` wheel for macOS x86_64 (Intel) on Python 3.13** — confirmed
-  via `uv`'s dependency resolver, which lists `macosx_14_0_arm64` (Apple
-  Silicon) and Linux as the platforms with available wheels. This blocks
-  `sentence-transformers` (and therefore `auto_knowledge_graph`'s embedding
-  step) entirely on the current Intel development machine, independent of
-  virtual environment or Python version choice, for as long as this
-  platform gap persists upstream.
+- **No `torch` wheel for macOS x86_64 (Intel) on Python 3.13** — was
+  confirmed blocking on the original Intel development machine (no
+  `macosx_x86_64` wheel existed, only `macosx_14_0_arm64` and Linux).
+  **Resolved 2026-07-20**: current machine is `arm64`; `uv pip install
+  --python .venv/bin/python sentence-transformers faiss-cpu` in
+  `auto_knowledge_graph` resolved torch 2.13.0 and friends with no issue.
+  Leaving this entry for history — if this ever runs on an Intel machine
+  again, the blocker will resurface.
 - **Freeform relationship strings are intentional, not a bug** —
   `relation_map.py` maps Wikidata PIDs to real semantic labels
   (`instance_of`, `subclass_of`, ...) rather than forcing them into
