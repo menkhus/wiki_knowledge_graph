@@ -83,6 +83,24 @@ Status as of 2026-07-20. Resumed on this machine, now confirmed `arm64`
       ml_neighborhood_demo.md` recording the Phase 5 run is now written
       (see below) — fold into Phase 4 docs pass.
 
+## Ideas / backlog (unscheduled, not part of the phase plan above)
+
+- [ ] **Named-entity density check** — a lightweight, scoped-down feature
+      extraction, added 2026-07-20 from a side discussion about a personal
+      reading memory (Tolstoy vs. golden-age hard SF): count distinct named
+      entities per 1000 words, plus frequency of kinship/title/clothing
+      nouns, across a small text sample. Purpose: test whether a specific,
+      falsifiable claim holds ("Tolstoy-style 19th-century social-realist
+      prose is measurably denser in named people/relationships/social detail
+      than Clarke/Asimov-era hard SF, which is comparatively idea-forward
+      and description-thin") — not a general stylometry pipeline. Explicitly
+      **not** the heavier stylometric approach (parse-tree depth, TTR,
+      hapax legomena rate, readability scores) considered and correctly
+      rejected in the same discussion as overkill for this project's scope
+      and running into copyright limits on any real corpus. No dependency
+      on the Wikidata connector; would live as a separate small script if
+      pursued, not a `wikidata_connector` capability.
+
 ## Known issues / decisions made during Phase 1-2 (don't relitigate these)
 
 - **Label fallback:** not every Wikidata entity has an `en` label (e.g. Q42
