@@ -52,12 +52,34 @@ Status as of 2026-07-20. Resumed on this machine, now confirmed `arm64`
       `uv pip install --python .venv/bin/python -e ".[dev]"` — the repo's
       own `.venv` didn't have them despite `pyproject.toml` listing the
       `dev` extra. Full suite: 23/23 passing.
+- [x] Phase 3 — DSL/vocabulary-probe capability, written 2026-07-20:
+      `vocab_probe.py` (`build_subtree_query`, `probe_vocabulary`) +
+      `wikidata-kg vocab <qid>` subcommand. Given a class QID, enumerates its
+      `wdt:P31/wdt:P279*` subtree (reusing `query_fragments.subtree_member_clause`,
+      which was already built anticipating this) and tallies which
+      properties actually occur on members — a discovery tool for growing
+      `relation_map.py`'s PID table from real usage, not just a report.
+      5 new mocked tests (`tests/test_vocab_probe.py`, same injectable-client
+      pattern as `test_neighborhood.py`); full suite 28/28 passing. Verified
+      live: `wikidata-kg vocab Q11344 --limit 40 --top 10` (Q11344 = chemical
+      element, confirmed via live label fetch first) surfaced `P31`
+      (instance_of, 39/40) and `P279` (subclass_of, 18/40) as expected, plus
+      7 real unmapped PIDs (`P138`, `P1343`, `P61`, `P910`, `P5008`, `P1889`,
+      `P1552`) — genuine candidates for `relation_map.py`, not synthetic.
+      Also found and fixed along the way: the `.venv`'s editable install of
+      this package was stale (`.pth`-based finder present but not actually
+      registering at interpreter startup, so `wikidata-kg` as an installed
+      console script failed with `ModuleNotFoundError` even though
+      `python -m wikidata_connector.cli` worked fine) — fixed by
+      `uv pip install --python .venv/bin/python -e ".[dev]" --reinstall-package wikidata-connector`.
+      Unrelated to this phase's code; a pre-existing environment issue,
+      noted here in case it recurs.
 
 ## Next (in order)
 
-- [ ] Phase 3 — DSL/vocabulary-probe capability (`vocab_probe.py`,
-      `wikidata-kg vocab` subcommand).
-- [ ] Phase 4 — CLI unification, README/CLAUDE.md updates. `examples/
+- [ ] Phase 4 — CLI unification (add the `fetch` subcommand — currently
+      `fetch_neighborhood()`/`write_kg_json()` are only callable directly
+      from Python, not via `wikidata-kg`), README/CLAUDE.md updates. `examples/
       ml_neighborhood_demo.md` recording the Phase 5 run is now written
       (see below) — fold into Phase 4 docs pass.
 

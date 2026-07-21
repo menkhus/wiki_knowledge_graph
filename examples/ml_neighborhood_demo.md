@@ -6,8 +6,16 @@ embedding/query pipeline end to end, with no manual JSON editing.
 
 ## 1. Fetch the neighborhood
 
-```
-wikidata-kg fetch Q7259 --hops 1 --limit 30 --out knowledge_graph/
+`wikidata-kg fetch` doesn't exist as a CLI subcommand yet — wiring it up is
+Phase 4's job (see TODO.md). This step was run directly from Python instead:
+
+```python
+from pathlib import Path
+from wikidata_connector.neighborhood import fetch_neighborhood
+from wikidata_connector.kg_json_writer import write_kg_json
+
+result = fetch_neighborhood("Q7259", hops=1, limit=30)
+write_kg_json(result, Path("knowledge_graph/"))
 ```
 
 Q7259 = Ada Lovelace. Produces `ada_lovelace_kg.json`: 31 nodes, 30 edges,
